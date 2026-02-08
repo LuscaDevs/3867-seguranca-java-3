@@ -7,9 +7,9 @@ public record DadosListagemResposta(
         String mensagem,
         String autor,
         LocalDateTime dataCriacao,
-        Boolean solucao
-) {
+        Boolean solucao) {
     public DadosListagemResposta(Resposta resposta) {
-        this(resposta.getId(), resposta.getMensagem(), resposta.getAutor(), resposta.getDataCriacao(), resposta.ehSolucao());
+        this(resposta.getId(), resposta.getMensagem(), resposta.getAutor().getNomeUsuario(), resposta.getDataCriacao(),
+                resposta.ehSolucao());
     }
 }

@@ -40,7 +40,7 @@ public class FiltroTokenAcesso extends OncePerRequestFilter {
             String username = tokenService.extrairSubject(token);
 
             // Buscar o usuário no banco de dados
-            var usuario = usuarioRepository.findByEmailIgnoreCase(username);
+            var usuario = usuarioRepository.findByEmailIgnoreCaseAndVerificadoTrue(username);
 
             // Criar autenticação no Spring Security com o usuário completo
             if (usuario.isPresent()) {

@@ -14,6 +14,7 @@ import br.com.forum_hub.infra.exception.RegraDeNegocioException;
 
 import java.time.LocalDateTime;
 import java.util.Collection;
+import java.util.Optional;
 import java.util.UUID;
 
 @Entity
@@ -33,6 +34,7 @@ public class Usuario implements UserDetails {
     private Boolean verificado;
     private String token;
     private LocalDateTime expiracaoToken;
+    private Boolean ativo;
 
     public Usuario(DadosCadastroUsuario dados) {
         this.nomeCompleto = dados.nomeCompleto();
@@ -53,6 +55,7 @@ public class Usuario implements UserDetails {
         this.verificado = false;
         this.token = UUID.randomUUID().toString();
         this.expiracaoToken = LocalDateTime.now().plusMinutes(30);
+        this.ativo = true;
     }
 
     @Override
@@ -101,5 +104,19 @@ public class Usuario implements UserDetails {
         this.verificado = true;
         this.token = null;
         this.expiracaoToken = null;
+    }
+
+    public void atualizar(DadosAtualizacaoUsuario dados) {
+        Optional.ofNullable(dados.nomeCompleto()).ifPresent(valor -> this.nomeCompleto = valor);
+        Optional.ofNullable(dados.biografia()).ifPresent(valor -> this.biografia = valor);
+        Optional.ofNullable(dados.miniBiografia()).ifPresent(valor -> this.miniBiografia = valor);
+    }
+
+    public void alterarSenha(String novaSenhaCriptografada) {
+        this.senha = novaSenhaCriptografada;
+    }
+
+    public void desativar() {
+        this.ativo = false;
     }
 }

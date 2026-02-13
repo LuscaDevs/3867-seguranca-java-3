@@ -26,7 +26,7 @@ public class UsuarioService implements UserDetailsService {
 
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        return usuarioRepository.findByEmailIgnoreCaseAndVerificadoTrue(username)
+        return usuarioRepository.findByEmailIgnoreCaseAndVerificadoTrueAndAtivoTrue(username)
                 .orElseThrow(() -> new UsernameNotFoundException("O usuário não foi encontrado!"));
     }
 
@@ -38,6 +38,42 @@ public class UsuarioService implements UserDetailsService {
 
         emailService.enviarEmailVerificacao(usuario);
         return usuarioRepository.save(usuario);
+    }
+
+    @Transactional
+    public Usuario atualizar(Usuario usuario, DadosAtualizacaoUsuario dados) {
+        usuario.atualizar(dados);
+        return usuarioRepository.save(usuario);
+    }
+
+    @Transactional
+    public void mudarSenha(Usuario usuario, DadosMudancaSenha dados) {
+        // Validar senha atual
+        if (!passwordEncoder.matches(dados.senhaAtual(), usuario.getPassword())) {
+            throw new RegraDeNegocioException("Senha atual incorreta!");
+        }
+
+        // Validar se não é igual à anterior
+        if (passwordEncoder.matches(dados.novaSenha(), usuario.getPassword())) {
+            throw new RegraDeNegocioException("Nova senha não pode ser igual à anterior!");
+        }
+
+        // Criptografar e atualizar
+        var novaSenhaCriptografada = passwordEncoder.encode(dados.novaSenha());
+        usuario.alterarSenha(novaSenhaCriptografada);
+        usuarioRepository.save(usuario);
+    }
+
+    @Transactional
+    public void deletar(Usuario usuario) {
+        usuario.desativar();
+        usuarioRepository.save(usuario);
+    }
+
+    @Transactional(readOnly = true)
+    public Usuario buscarPorNomeUsuario(String nomeUsuario) {
+        return usuarioRepository.findByNomeUsuarioIgnoreCase(nomeUsuario)
+                .orElseThrow(() -> new RegraDeNegocioException("Usuário não encontrado!"));
     }
 
     @Transactional
